@@ -128,6 +128,9 @@ function! NERDTreeAddNode()
         let parentNode = b:NERDTree.root.findNode(newPath.getParent())
 
         let newTreeNode = g:NERDTreeFileNode.New(newPath, b:NERDTree)
+        " Emptying g:NERDTreeOldSortOrder forces the sort to
+        " recalculate the cached sortKey so nodes sort correctly.
+        let g:NERDTreeOldSortOrder = []
         if empty(parentNode)
             call b:NERDTree.root.refresh()
             call b:NERDTree.render()
@@ -158,6 +161,9 @@ function! NERDTreeMoveNode()
         let bufnum = bufnr("^".curNode.path.str()."$")
 
         call curNode.rename(newNodePath)
+        " Emptying g:NERDTreeOldSortOrder forces the sort to
+        " recalculate the cached sortKey so nodes sort correctly.
+        let g:NERDTreeOldSortOrder = []
         call b:NERDTree.root.refresh()
         call NERDTreeRender()
 
@@ -226,9 +232,9 @@ function! NERDTreeListNode()
     let treenode = g:NERDTreeFileNode.GetSelected()
     if !empty(treenode)
         let s:uname = system("uname")
-        let stat_cmd = 'stat -c "%s" ' 
-        
-        if s:uname =~? "Darwin"                
+        let stat_cmd = 'stat -c "%s" '
+
+        if s:uname =~? "Darwin"
             let stat_cmd = 'stat -f "%z" '
         endif
 
@@ -248,33 +254,13 @@ function! NERDTreeListNodeWin32()
     let l:node = g:NERDTreeFileNode.GetSelected()
 
     if !empty(l:node)
-
-        let l:save_shell = &shell
-        set shell&
-
-        if exists('+shellslash')
-            let l:save_shellslash = &shellslash
-            set noshellslash
-        endif
-
-        let l:command = 'DIR /Q '
-                    \ . shellescape(l:node.path.str())
-                    \ . ' | FINDSTR "^[012][0-9]/[0-3][0-9]/[12][0-9][0-9][0-9]"'
-
-        let l:metadata = split(system(l:command), "\n")
-
-        if v:shell_error == 0
-            call nerdtree#echo(l:metadata[0])
-        else
-            call nerdtree#echoError('shell command failed')
-        endif
-
-        let &shell = l:save_shell
-
-        if exists('l:save_shellslash')
-            let &shellslash = l:save_shellslash
-        endif
-
+        let l:path = l:node.path.str()
+        call nerdtree#echo(printf("%s:%s  MOD:%s  BYTES:%d  PERMISSIONS:%s",
+                    \ toupper(getftype(l:path)),
+                    \ fnamemodify(l:path, ':t'),
+                    \ strftime("%c", getftime(l:path)),
+                    \ getfsize(l:path),
+                    \ getfperm(l:path)))
         return
     endif
 
@@ -303,6 +289,9 @@ function! NERDTreeCopyNode()
         if confirmed
             try
                 let newNode = currentNode.copy(newNodePath)
+                " Emptying g:NERDTreeOldSortOrder forces the sort to
+                " recalculate the cached sortKey so nodes sort correctly.
+                let g:NERDTreeOldSortOrder = []
                 if empty(newNode)
                     call b:NERDTree.root.refresh()
                     call b:NERDTree.render()

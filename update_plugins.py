@@ -57,6 +57,7 @@ vim-abolish https://github.com/tpope/tpope-vim-abolish
 mru.vim https://github.com/vim-scripts/mru.vim
 vim-markdown https://github.com/plasticboy/vim-markdown
 comfortable-motion.vim https://github.com/yuttie/comfortable-motion.vim
+vim-ansible https://github.com/chase/vim-ansible-yaml
 """.strip()
 
 GITHUB_ZIP = '%s/archive/master.zip'
